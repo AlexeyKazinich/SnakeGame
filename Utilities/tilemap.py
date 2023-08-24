@@ -4,15 +4,16 @@ from Utilities.objects import Rectangle
 NEIGHBOR_OFFSETS = [(-1,0), (-1,-1), (0,-1), (1,-1), (1,0), (0,0), (-1,1),(0,1),(1,1)]
 
 class Tile:
-    def __init__(self,screen: pygame.display, pos: tuple,tile_size: int = 16,fill_type: str = "outline"):
+    def __init__(self,screen: pygame.display, pos: tuple,tile_size: int = 16,fill_type: str = "outline",color: pygame.Color = pygame.Color(255,255,255,255)):
         self.tile_size = tile_size
         self.pos = pos
         self.screen = screen
-        self.fill_type = "fill"
+        self.fill_type = fill_type
+        self.color = color
         
     def draw(self,offset:tuple = (0,0),color: pygame.Color = pygame.Color(255,255,255,255)) -> None:
         if self.fill_type == "fill":
-            self.rect = Rectangle((self.pos[0] + offset[0])*self.tile_size,(self.pos[1]+offset[1])*self.tile_size,self.tile_size,self.tile_size,self.screen,color)
+            self.rect = Rectangle((self.pos[0] + offset[0])*self.tile_size,(self.pos[1]+offset[1])*self.tile_size,self.tile_size,self.tile_size,self.screen,self.color)
             self.rect.draw()
         elif self.fill_type == "outline":
             self.rect = Rectangle((self.pos[0] + offset[0])*self.tile_size,(self.pos[1]+offset[1])*self.tile_size,self.tile_size,self.tile_size,self.screen,color)
@@ -39,8 +40,8 @@ class Tilemap:
                 tiles[f"{check_loc[0]}:{check_loc[1]}"] = Tile(self.screen,(check_loc[0],check_loc[1]))
         return tiles
         
-    def set_tile(self,location: tuple,color: pygame.Color):
-        self.tilemap[f"{location[0]}:{location[1]}"] = Tile(self.screen,tuple,color=color)
+    def set_tile(self,location: tuple,color: pygame.Color, tile_size: int):
+        self.tilemap[f"{location[0]},{location[1]}"] = Tile(self.screen,location,tile_size,"fill",color=color)
     
     def add_surrounding_tiles(self,pos: tuple) -> None:
         """addes tiles around a given point"""
