@@ -8,7 +8,6 @@ class Game(Game):
         super().__init__()
         self.grid = Tilemap(self.screen,32)
         self.grid.fill_screen()
-        self.player_loc = [random.randint(0,10),random.randint(0,10)]
         self.head_color = pygame.Color(0,200,0,255)
         self.body_color = pygame.Color(0,255,0,255)
         self.movement = "right"
@@ -17,30 +16,38 @@ class Game(Game):
             "head": [random.randint(0,10),random.randint(0,10)],
         }
         self.snake[f"body{self.length_counter}"] = [self.snake["head"][0],self.snake["head"][1]-1]
+        print(self.snake)
         
     def draw(self) -> None:
         """draws everything to the screen"""
         self.screen.fill((255,255,255))
         self.grid.draw(color=pygame.Color(0,0,0,255))
-        self.grid.set_tile(self.player_loc,self.head_color,32)
+        self.grid.set_tile(self.snake["head"],self.head_color,32)
         
         for key, value in self.snake.items():
             if key is not "head":
                 self.grid.set_tile(value,self.body_color,32)
+            else:
+                self.grid.set_tile(value,self.head_color,32)
         pygame.display.flip()
     
     def update_grid(self):
-        temp = (self.player_loc[0],self.player_loc[1])
+        temp = (self.snake["head"][0],self.snake["head"][1])
         if self.movement == "right":
-            self.player_loc[0] +=1
+            self.snake["head"][0] +=1
         elif self.movement == "left":
-            self.player_loc[0] -=1
+            self.snake["head"][0] -=1
         elif self.movement == "up":
-            self.player_loc[1] -= 1
+            self.snake["head"][1] -= 1
         elif self.movement == "down":
-            self.player_loc[1] += 1
+            self.snake["head"][1] += 1
         self.grid.fill_screen()
-        self.grid.set_tile((self.player_loc[0],self.player_loc[1]),self.head_color,32)
+        
+        for key, value in self.snake.items():
+            if key == "head":
+                self.grid.set_tile((value[0],value[1]),self.head_color,32)
+            if key == "body1":
+                self.grid.set_tile((self.snake["head"][0],self.snake["head"][1]),self.body_color,32)
         
     
     def logic_checks(self) -> None:
