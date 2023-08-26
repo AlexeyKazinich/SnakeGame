@@ -1,5 +1,6 @@
 import pygame
 from Utilities.objects import Rectangle
+from random import randint
 
 NEIGHBOR_OFFSETS = [(-1,0), (-1,-1), (0,-1), (1,-1), (1,0), (0,0), (-1,1),(0,1),(1,1)]
 
@@ -11,53 +12,27 @@ class Tile:
         self.fill_type = fill_type
         self.color = color
         
-    def draw(self,offset:tuple = (0,0),color: pygame.Color = pygame.Color(255,255,255,255)) -> None:
+    
+    def draw(self,offset:tuple = (0,0),color: pygame.Color = pygame.Color(0,0,0,255)) -> None:
         if self.fill_type == "fill":
-            self.rect = Rectangle((self.pos[0] + offset[0])*self.tile_size,(self.pos[1]+offset[1])*self.tile_size,self.tile_size,self.tile_size,self.screen,self.color)
+            self.rect = Rectangle((int(self.pos[0]) + int(offset[0]))*self.tile_size,(int(self.pos[1])+int(offset[1]))*self.tile_size,self.tile_size,self.tile_size,self.screen,self.color)
             self.rect.draw()
         elif self.fill_type == "outline":
-            self.rect = Rectangle((self.pos[0] + offset[0])*self.tile_size,(self.pos[1]+offset[1])*self.tile_size,self.tile_size,self.tile_size,self.screen,color)
+            self.rect = Rectangle((int(self.pos[0]) + int(offset[0]))*self.tile_size,(self.pos[1]+offset[1])*self.tile_size,self.tile_size,self.tile_size,self.screen,color)
             self.rect.draw_box()
         
-    def set_color(self,color: pygame.Color) -> None:
-        self.color = color
         
 class Tilemap:
     def __init__(self,screen: pygame.display, tile_size: int = 16):
+        self.head_color = pygame.Color(0,200,0,255)
+        self.body_color = pygame.Color(0,255,0,255)
+        
         self.tile_size = tile_size
         self.tilemap ={}
         self.offgrid_tiles = {}
+        self.snake = {"head": Tile(screen, (randint(0,10),randint(0,10)),tile_size,"fill",self.head_color)}
+        self.snake_length = 1
         self.screen = screen
-        
-    
-    def tiles_around(self,pos: tuple) -> dict:
-        tiles = {}
-        tile_loc = (int(pos[0] // self.tile_size), int(pos[1] // self.tile_size))
-        
-        for offset in NEIGHBOR_OFFSETS:
-            check_loc = str(int(tile_loc[0]) + int(offset[0])) + ';' + str(tile_loc[1] + offset[1])
-            if check_loc in self.tilemap:
-                tiles[f"{check_loc[0]}:{check_loc[1]}"] = Tile(self.screen,(check_loc[0],check_loc[1]))
-        return tiles
-        
-    def set_tile(self,location: tuple,color: pygame.Color, tile_size: int):
-        self.tilemap[f"{location[0]},{location[1]}"] = Tile(self.screen,location,tile_size,"fill",color=color)
-    
-    def add_surrounding_tiles(self,pos: tuple) -> None:
-        """addes tiles around a given point"""
-        self.tilemap = {}
-        for offset in NEIGHBOR_OFFSETS:
-            get_loc = ((offset[0] + int(pos[0] // self.tile_size)), (offset[1] + int(pos[1] // self.tile_size)))
-            self.tilemap[f"{get_loc[0]},{get_loc[1]}"] = Tile(self.screen,get_loc,self.tile_size)
-       
-    
-    
-    def add_10x10_grid(self) -> None:
-        self.tilemap = {}
-        for i in range(10):
-            for j in range(10):
-                get_loc = ((i), (j))
-                self.tilemap[f"{get_loc[0]},{get_loc[1]}"] = Tile(self.screen,get_loc,self.tile_size)
     
     def draw_grid(self,size:tuple) -> None:
         """call this to draw a grid"""
@@ -75,12 +50,15 @@ class Tilemap:
     
     
     def draw(self,offset:tuple = (0,0),color: pygame.Color = pygame.Color(255,255,255,255)):
-        for _, value in self.tilemap.items():
-            value.draw(offset=offset,color=color)
+        self.fill_screen()
+        for key, value in self.tilemap.items():
+            value.draw("fill")
+        for key, value in self.snake.items():
+            value.draw()
             
     
     
-    def logic(self,pos:tuple) -> None:
+    def logic(self,move:str) -> None:
         """"""
         pass
     
