@@ -1,7 +1,6 @@
 import pygame
 from Utilities.game import Game
 from Utilities.tilemap import Tilemap
-import random
 
 class Game(Game):
     def __init__(self):
