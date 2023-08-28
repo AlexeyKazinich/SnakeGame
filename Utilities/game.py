@@ -5,7 +5,7 @@ class Game:
     def __init__(self) -> None:
         pygame.init()
         self.screen_width = 800
-        self.screen_height = 600
+        self.screen_height = 608
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.running = True
         self.clock = pygame.time.Clock()

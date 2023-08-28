@@ -1,8 +1,8 @@
 import pygame
-from Utilities.objects import Rectangle
+from Utilities.objects import Rectangle, Text
 from random import randint
 
-NEIGHBOR_OFFSETS = [(-1,0), (-1,-1), (0,-1), (1,-1), (1,0), (0,0), (-1,1),(0,1),(1,1)]
+NEIGHBOR_OFFSETS = [(-1,0), (-1,-1), (0,-1), (1,-1), (0,0), (1,0), (-1,1),(0,1),(1,1)]
 
 class Tile:
     def __init__(self,screen: pygame.display, pos: tuple,tile_size: int = 16,fill_type: str = "outline",color: pygame.Color = pygame.Color(255,255,255,255)):
@@ -14,6 +14,7 @@ class Tile:
         self.color = color
         self.rect = Rectangle(0,0,0,0,self.screen,(255,255,255))
         
+        
     
     def draw(self,offset:tuple = (0,0),color: pygame.Color = pygame.Color(0,0,0,255)) -> None:
         """draws the rectangle"""
@@ -23,6 +24,7 @@ class Tile:
         elif self.fill_type == "outline":
             self.rect = Rectangle((self.pos[0] + int(offset[0])) *self.tile_size,(self.pos[1]+offset[1])*self.tile_size,self.tile_size,self.tile_size,self.screen,color)
             self.rect.draw_box()
+        
             
     def collide(self,rect: Rectangle) -> bool:
         """checks if the rectangle is colliding with a different rectangle"""
@@ -41,6 +43,7 @@ class Tilemap:
         self.snake = {"head": Tile(screen, (randint(0,10),randint(0,10)),tile_size,"fill",self.head_color)}
         self.snake_length = 1
         self.screen = screen
+        self.grid_size = self.get_grid_size() #24,18
         
         self.apple = Tile(self.screen,(randint(0,10),randint(0,10)),32,"fill",self.apple_color)
     
@@ -65,17 +68,30 @@ class Tilemap:
             self.snake[f"body{self.snake_length}"] = Tile(self.screen,self.get_loc_part(f"body{self.snake_length-1}"),fill_type="fill",color=self.body_color,tile_size=self.tile_size)
             self.snake_length += 1
     
+    def get_grid_size(self) -> tuple:
+        size = [self.screen.get_width(),self.screen.get_height()]
+        return (int(size[0] / self.tile_size),int(size[1] / self.tile_size)) #returns 25,19
+
+    
     def fill_screen(self) -> None:
         """fills the screen with a grid"""
-        size = [self.screen.get_width(),self.screen.get_height()]
-        for i in range(int(size[0] / self.tile_size)+1):
-            for j in range(int(size[1] / self.tile_size)+1):
+        for i in range(self.grid_size[0]):
+            for j in range(self.grid_size[1]):
                 get_loc = (i,j)
                 self.tilemap[f"{get_loc[0]},{get_loc[1]}"] = Tile(self.screen,get_loc,self.tile_size)
     
-    def get_tiles_around(self) -> None:
+    def get_tiles_around(self) -> list:
         """gets the tiles around the head to check for collisions"""
+        tiles = []
         loc = self.snake["head"].pos
+        for offset in NEIGHBOR_OFFSETS:
+            try:
+                for key, value in self.snake.items():
+                    if self.tilemap[f"{loc[0] + offset[0]},{loc[1] + offset[1]}"].pos == value.pos and key != "head":
+                        tiles.append(self.tilemap[f"{loc[0] + offset[0]},{loc[1] + offset[1]}"])
+            except KeyError:
+                print("out of bounds")
+        return tiles
     
     def draw(self,offset:tuple = (0,0),color: pygame.Color = pygame.Color(255,255,255,255)):
         self.fill_screen()
@@ -87,15 +103,21 @@ class Tilemap:
             
     def update_apple(self) -> None:
         """relocates the apple to a new location"""
-        self.apple = Tile(self.screen,(randint(0,24),randint(0,19)),self.tile_size,"fill",self.apple_color)
+        self.apple = Tile(self.screen,(randint(0,self.grid_size[0]-1),randint(0,self.grid_size[1]-1)),self.tile_size,"fill",self.apple_color)
     
     
     def logic(self,move:str) -> None:
         """runs the logic for the tilemap"""
+        #check collision with apple
         if self.snake["head"].collide(self.apple.rect):
             self.extend_snake()
             self.update_apple()
-            
+        
+        #check collision with self
+        tiles = self.get_tiles_around()
+        for tile in tiles:
+            if self.snake["head"].collide(tile.rect):
+                print("BOOM")
         
         count = 1
         for key, value in self.snake.items():
@@ -119,5 +141,15 @@ class Tilemap:
                 value.previous_pos = value.pos
                 value.pos = self.snake[f"body{count}"].previous_pos
                 count += 1
-        
+        #left-right
+        if self.snake["head"].pos[0] > self.grid_size[0] -1:
+            self.snake["head"].pos = (0,self.snake["head"].pos[1])
+        elif self.snake["head"].pos[0] < 0:
+            self.snake["head"].pos = (self.grid_size[0] -1,self.snake["head"].pos[1])
+            
+        #up-down
+        if self.snake["head"].pos[1] < 0:
+            self.snake["head"].pos = (self.snake["head"].pos[0],self.grid_size[1]-1)
+        elif self.snake["head"].pos[1] > self.grid_size[1] -1:
+            self.snake["head"].pos = (self.snake["head"].pos[0],0)
         

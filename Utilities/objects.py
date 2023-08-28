@@ -1,5 +1,5 @@
 import pygame
-
+from typing import Union
 class Rectangle:
     def __init__(self,
                  x,
@@ -151,3 +151,28 @@ class Button:
                 self.set_active()
                 self.pressed = True
             else: self.pressed = False
+
+
+class Text():
+    def __init__(self,text : str, loc_x : int, loc_y: int, window, font_size : int = 32, color : Union[tuple,str] = 'dodgerblue2',subtract_width : bool = False, subtract_height: bool = False) -> None:
+        self.text = text
+        self.color = color
+        self.window = window
+        self.loc_x = loc_x
+        self.loc_y = loc_y
+        self.font = pygame.font.Font(None,font_size)
+        self.word_surface = self.font.render(self.text,True,pygame.Color(self.color))
+        
+        if(subtract_width):
+            self.loc_x -= self.word_surface.get_width()
+        if(subtract_height):
+            self.loc_y -= self.word_surface.get_height()
+
+    def update_text(self,text :str) -> None:
+        """update the text"""
+        self.text = text
+        self.word_surface = self.font.render(self.text,True,pygame.Color(self.color))
+    
+    def draw(self) -> None:
+        """draw the word"""
+        self.window.blit(self.word_surface,(self.loc_x,self.loc_y))
