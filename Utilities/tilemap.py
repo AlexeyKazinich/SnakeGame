@@ -16,6 +16,7 @@ class Tile:
         
     
     def draw(self,offset:tuple = (0,0),color: pygame.Color = pygame.Color(0,0,0,255)) -> None:
+        """draws the rectangle"""
         if self.fill_type == "fill":
             self.rect = Rectangle((int(self.pos[0]) + int(offset[0]))*self.tile_size,(int(self.pos[1])+int(offset[1]))*self.tile_size,self.tile_size,self.tile_size,self.screen,self.color)
             self.rect.draw()
@@ -23,7 +24,8 @@ class Tile:
             self.rect = Rectangle((self.pos[0] + int(offset[0])) *self.tile_size,(self.pos[1]+offset[1])*self.tile_size,self.tile_size,self.tile_size,self.screen,color)
             self.rect.draw_box()
             
-    def collide(self,rect: Rectangle):
+    def collide(self,rect: Rectangle) -> bool:
+        """checks if the rectangle is colliding with a different rectangle"""
         return self.rect.collidepoint((rect.x,rect.y))
         
         
@@ -50,10 +52,12 @@ class Tilemap:
                 self.tilemap[f"{get_loc[0]},{get_loc[1]}"] = Tile(self.screen,get_loc,self.tile_size)
     
     def get_loc_part(self,name: str) -> tuple:
+        """gets the location from the dictionary for a given snake part"""
         location = (self.snake[name].pos[0],self.snake[name].pos[1] + 1)
         return location
     
     def extend_snake(self) -> None:
+        """extends the snake by 1"""
         if self.snake_length == 1:
             self.snake[f"body{self.snake_length}"] =Tile(self.screen,self.get_loc_part("head"),fill_type="fill",color=self.body_color,tile_size=self.tile_size)
             self.snake_length += 1
@@ -62,6 +66,7 @@ class Tilemap:
             self.snake_length += 1
     
     def fill_screen(self) -> None:
+        """fills the screen with a grid"""
         size = [self.screen.get_width(),self.screen.get_height()]
         for i in range(int(size[0] / self.tile_size)+1):
             for j in range(int(size[1] / self.tile_size)+1):
@@ -74,76 +79,45 @@ class Tilemap:
     
     def draw(self,offset:tuple = (0,0),color: pygame.Color = pygame.Color(255,255,255,255)):
         self.fill_screen()
-        for key, value in self.tilemap.items():
+        for _, value in self.tilemap.items():
             value.draw()
-        for key, value in self.snake.items():
+        for _, value in self.snake.items():
             value.draw()
         self.apple.draw()
             
-    def update_apple(self):
-        self.apple = Tile(self.screen,(randint(0,10),randint(0,10)),32,"fill",self.apple_color)
+    def update_apple(self) -> None:
+        """relocates the apple to a new location"""
+        self.apple = Tile(self.screen,(randint(0,24),randint(0,19)),self.tile_size,"fill",self.apple_color)
     
     
     def logic(self,move:str) -> None:
-        """"""
+        """runs the logic for the tilemap"""
         if self.snake["head"].collide(self.apple.rect):
             self.extend_snake()
             self.update_apple()
             
         
-        if move == "right":
-            count = 1
-            for key, value in self.snake.items():
-                if key == "head":
-                    value.previous_pos = value.pos
-                    value.pos = (value.pos[0] + 1,value.pos[1])
-                elif key == "body1":
-                    value.previous_pos = value.pos
-                    value.pos = self.snake["head"].previous_pos
-                else:
-                    value.previous_pos = value.pos
-                    value.pos = self.snake[f"body{count}"].previous_pos
-                    count += 1
+        count = 1
+        for key, value in self.snake.items():
+            if key == "head" and move == "right":
+                value.previous_pos = value.pos
+                value.pos = (value.pos[0] + 1,value.pos[1])
+            elif key == "head" and move == "left":
+                value.previous_pos = value.pos
+                value.pos = (value.pos[0] - 1,value.pos[1])
+            elif key == "head" and move == "up":
+                value.previous_pos = value.pos
+                value.pos = (value.pos[0],value.pos[1]-1)
+            elif key == "head" and move == "down":
+                value.previous_pos = value.pos
+                value.pos = (value.pos[0],value.pos[1]+1)
+                
+            elif key == "body1":
+                value.previous_pos = value.pos
+                value.pos = self.snake["head"].previous_pos
+            else:
+                value.previous_pos = value.pos
+                value.pos = self.snake[f"body{count}"].previous_pos
+                count += 1
         
-        if move == "down":
-            count = 1
-            for key, value in self.snake.items():
-                if key == "head":
-                    value.previous_pos = value.pos
-                    value.pos = (value.pos[0],value.pos[1] + 1)
-                elif key == "body1":
-                    value.previous_pos = value.pos
-                    value.pos = self.snake["head"].previous_pos
-                else:
-                    value.previous_pos = value.pos
-                    value.pos = self.snake[f"body{count}"].previous_pos
-                    count += 1
-                    
-        if move == "left":
-            count = 1
-            for key, value in self.snake.items():
-                if key == "head":
-                    value.previous_pos = value.pos
-                    value.pos = (value.pos[0] - 1,value.pos[1])
-                elif key == "body1":
-                    value.previous_pos = value.pos
-                    value.pos = self.snake["head"].previous_pos
-                else:
-                    value.previous_pos = value.pos
-                    value.pos = self.snake[f"body{count}"].previous_pos
-                    count += 1
-                    
         
-        if move == "up":
-            count = 1
-            for key, value in self.snake.items():
-                if key == "head":
-                    value.previous_pos = value.pos
-                    value.pos = (value.pos[0],value.pos[1] - 1)
-                elif key == "body1":
-                    value.previous_pos = value.pos
-                    value.pos = self.snake["head"].previous_pos
-                else:
-                    value.previous_pos = value.pos
-                    value.pos = self.snake[f"body{count}"].previous_pos
-                    count += 1

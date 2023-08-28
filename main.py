@@ -17,7 +17,8 @@ class Game(Game):
         self.grid.draw(offset=(0,0),color=pygame.Color(0,0,0,255))
         pygame.display.flip()
     
-    def update_grid(self):
+    def update_grid(self) -> None:
+        """updates the grid"""
         self.grid.logic(self.movement)
         self.grid.fill_screen()
     
@@ -36,8 +37,6 @@ class Game(Game):
                     self.movement = "left"
                 if event.key == pygame.K_w and not self.movement == "down":
                     self.movement = "up"
-                if event.key == pygame.K_n:
-                    self.grid.extend_snake()
         self.update_grid()
     
     def run(self) -> None:

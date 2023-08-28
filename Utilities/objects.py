@@ -16,15 +16,16 @@ class Rectangle:
         self.__rect = pygame.Rect(x,y,width,height)
         self.window = window
 
-    def set_color(self,color:pygame.Color):
+    def set_color(self,color:pygame.Color) -> None:
+        """sets the color of the Rectangle"""
         self.color = color
     
     def draw(self)-> None:
-        """a filled rectangle"""
+        """draws a filled rectangle"""
         pygame.draw.rect(self.window,self.color,(self.x,self.y,self.width,self.height))
     
     def draw_box(self)-> None:
-        """an outline of a rectangle"""
+        """draws an outline of a rectangle"""
         pygame.draw.rect(self.window,self.color,(self.x,self.y,self.width,self.height),1)
 
     def collidepoint(self,locations: tuple) -> bool:
@@ -69,9 +70,9 @@ class Button:
         self.confirmed = False
         self.hover = False
         
-
-    #checks if the button was pressed, sets the value to false to prevent the button from staying pressed
+        
     def get_pressed(self) -> None:
+        """checks if the button was pressed, sets the value to false to prevent the button from staying pressed"""
         temp = self.pressed
         self.pressed = False
         return temp
@@ -87,26 +88,31 @@ class Button:
         self.__rectangle.y = self.y
         
     def set_active(self)-> None:
+        """makes the button active"""
         self.color = self.active_color
         self.text_color = self.active_color
         self.__rectangle.set_color(self.active_color)
 
     def set_deactive(self)-> None:
+        """makes the button inactive"""
         self.color = self.deactive_color
         self.text_color = self.deactive_color
         self.__rectangle.set_color(self.deactive_color)
     
     def set_hover(self)-> None:
+        """sets the button to hover"""
         self.color = self.hover_color
         self.text_color = self.hover_color
         self.__rectangle.set_color(self.hover_color)
 
     def set_color(self,color)-> None:
+        """sets the color of the button"""
         self.color = pygame.Color(color)
         self.textColor = pygame.Color(color)
 
 
     def collidepoint(self,locations) -> bool:
+        """checks if the coords passed are colliding with the button"""
         if(self.__rectangle.collidepoint(locations)):
             return True
         else:
@@ -129,6 +135,7 @@ class Button:
         self.check_click()
     
     def check_click(self)-> None:
+        """checks if the button was clicked"""
         mouse_pos = pygame.mouse.get_pos() #mouse pos
         #if hovering
         if self.__rectangle.collidepoint(mouse_pos):
