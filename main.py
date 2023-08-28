@@ -18,14 +18,7 @@ class Game(Game):
         pygame.display.flip()
     
     def update_grid(self):
-        if self.movement == "right":
-            self.grid.logic("right")
-        elif self.movement == "left":
-            self.grid.logic("left")
-        elif self.movement == "up":
-            self.grid.logic("up")
-        elif self.movement == "down":
-            self.grid.logic("down")
+        self.grid.logic(self.movement)
         self.grid.fill_screen()
     
     def logic_checks(self) -> None:
