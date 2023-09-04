@@ -1,20 +1,32 @@
 import sys
 import pygame
 from Utilities.tilemap import Tilemap
+from Utilities.objects import Button
     
 class MainMenu:
     def __init__(self,screen,sceneManager):
         self.screen = screen
         self.sceneManager = sceneManager
-        self.buttons = []
+        self.buttons = {
+            "start_game": Button(self.screen.get_width() //2 - 35,0,75,25,"start",self.screen,on_click_func=self.start_onclick)
+        }
         
     def draw(self):
         """draws everything to the screen"""
         self.screen.fill((0,255,0))
+        for _, button in self.buttons.items():
+            button.draw()
         pygame.display.flip()
+    
+    def start_onclick(self):
+        self.sceneManager.change_scene("game")
     
     def logic_checks(self):
         """runs all the game logic"""
+        for _, button in self.buttons.items():
+            button.update()
+        
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False

@@ -1,5 +1,5 @@
 import pygame
-from typing import Union
+from typing import Union, Callable
 class Rectangle:
     def __init__(self,
                  x,
@@ -47,7 +47,8 @@ class Button:
                  color: pygame.Color = pygame.Color('lightskyblue3'),
                  text_color: pygame.Color = pygame.Color('lightskyblue3'),
                  hover_color: pygame.Color = pygame.Color('deepskyblue1'), 
-                 active_color: pygame.Color = pygame.Color('dodgerblue2')) -> None:
+                 active_color: pygame.Color = pygame.Color('dodgerblue2'),
+                 on_click_func: Callable = None) -> None:
         self.x = x
         self.y = y
         self.width = width
@@ -63,6 +64,8 @@ class Button:
         self.font = pygame.font.Font(None,32)
         self.__rectangle = Rectangle(self.x,self.y,self.width,self.height,self.window)
         self.__rectangle.set_color(self.color)
+        
+        self.on_click_func = on_click_func
         
 
         #mouse events
@@ -148,8 +151,11 @@ class Button:
         #if clicking while hovering
         if(self.hover):
             if(pygame.mouse.get_pressed()[0]):
-                self.set_active()
-                self.pressed = True
+                if self.on_click_func == None:
+                    self.set_active()
+                    self.pressed = True
+                else:
+                    self.on_click_func()
             else: self.pressed = False
 
 
