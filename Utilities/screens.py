@@ -13,7 +13,7 @@ class MainMenu:
         
     def draw(self):
         """draws everything to the screen"""
-        self.screen.fill((0,255,0))
+        self.screen.fill((0,100,255))
         for _, button in self.buttons.items():
             button.draw()
         pygame.display.flip()
@@ -32,9 +32,6 @@ class MainMenu:
                 self.running = False
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    self.sceneManager.change_scene("game")
 
 class GameScreen:
     def __init__(self,screen, sceneManager):
@@ -43,6 +40,7 @@ class GameScreen:
         self.grid.fill_screen()
         self.movement = "right"
         self.sceneManager = sceneManager
+        self.paused = False
     
     def update_grid(self) -> None:
         """updates the grid"""
@@ -53,6 +51,12 @@ class GameScreen:
         """draws everything to the screen"""
         self.screen.fill((255,255,255))
         self.grid.draw(offset=(0,0),color=pygame.Color(0,0,0,255))
+        
+        if self.paused:
+            pause_color = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA)
+            pause_color.fill((255,255,255,150))
+            self.screen.blit(pause_color,(0,0))
+        
         pygame.display.flip()
     
     def logic_checks(self):
@@ -62,7 +66,7 @@ class GameScreen:
                 self.running = False
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN and not self.paused:
                 if event.key == pygame.K_d and not self.movement == "left":
                     self.movement = "right"
                 if event.key == pygame.K_s and not self.movement == "up":
@@ -72,8 +76,16 @@ class GameScreen:
                 if event.key == pygame.K_w and not self.movement == "down":
                     self.movement = "up"
                 if event.key == pygame.K_ESCAPE:
-                    self.sceneManager.change_scene("main_menu")
-        self.update_grid()
+                    self.paused = not self.paused
+                    print(self.paused)
+                    
+            elif event.type == pygame.KEYDOWN and self.paused:
+                if event.key == pygame.K_ESCAPE:
+                    self.paused = not self.paused
+                    print(self.paused)
+        
+        if not self.paused:          
+            self.update_grid()  
     
 class GameStateManager:
     def __init__(self,screen):
