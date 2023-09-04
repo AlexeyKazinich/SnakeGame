@@ -1,17 +1,20 @@
 import pygame
 from Utilities.game import Game
-from Utilities.tilemap import Tilemap
-from Utilities.screens import SceneManager
+from Utilities.screens import GameStateManager
 
-class Game(Game):
+class Game:
     def __init__(self):
-        super().__init__()
+        pygame.init()
+        self.screen_width = 800
+        self.screen_height = 608
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        self.running = True
+        self.clock = pygame.time.Clock()    
             
-        self.scene_manager = SceneManager(self.screen)
+        self.scene_manager = GameStateManager(self.screen)
         
     def draw(self) -> None:
         self.scene_manager.draw()
-    
     
     def logic_checks(self) -> None:
         self.scene_manager.logic_checks()
@@ -23,4 +26,6 @@ class Game(Game):
             self.draw()
             self.clock.tick(10)
       
-Game().run()
+
+if __name__ == "__main__":
+    Game().run()

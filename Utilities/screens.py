@@ -1,24 +1,36 @@
+import sys
 import pygame
 from Utilities.tilemap import Tilemap
-
-class Screen:
-    def __init__(self):
-        pass
     
+class MainMenu:
+    def __init__(self,screen,sceneManager):
+        self.screen = screen
+        self.sceneManager = sceneManager
+        self.buttons = []
+        
     def draw(self):
-        pass
+        """draws everything to the screen"""
+        self.screen.fill((0,255,0))
+        pygame.display.flip()
     
-    def update(self):
-        pass
-    
-
+    def logic_checks(self):
+        """runs all the game logic"""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.sceneManager.change_scene("game")
 
 class GameScreen:
-    def __init__(self,screen):
+    def __init__(self,screen, sceneManager):
         self.screen = screen
         self.grid = Tilemap(self.screen,32)
         self.grid.fill_screen()
         self.movement = "right"
+        self.sceneManager = sceneManager
     
     def update_grid(self) -> None:
         """updates the grid"""
@@ -37,6 +49,7 @@ class GameScreen:
             if event.type == pygame.QUIT:
                 self.running = False
                 pygame.quit()
+                sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_d and not self.movement == "left":
                     self.movement = "right"
@@ -46,21 +59,28 @@ class GameScreen:
                     self.movement = "left"
                 if event.key == pygame.K_w and not self.movement == "down":
                     self.movement = "up"
+                if event.key == pygame.K_ESCAPE:
+                    self.sceneManager.change_scene("main_menu")
         self.update_grid()
     
-class SceneManager:
+class GameStateManager:
     def __init__(self,screen):
         self.screen = screen
-        self.current_scene = "game"
+        self.current_scene = "main_menu"
         self.scene = {
-            "game" : GameScreen(self.screen),
-            "main_menu": Screen(),
+            "game" : GameScreen(self.screen,self),
+            "main_menu": MainMenu(self.screen,self),
         }
+        
+    def reset_scenes(self):
+        self.scene["game"] = GameScreen(self.screen, self)
+        self.scene["main_menu"] = MainMenu(self.screen, self)
         
     def change_scene(self,new_scene: str = "main_menu"):
         
         if new_scene in self.scene.keys(): 
             self.current_scene = new_scene
+            self.reset_scenes()
         else:
             raise Exception("Scene passed does not exist")
     

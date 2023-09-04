@@ -141,13 +141,13 @@ class Tilemap:
                 value.previous_pos = value.pos
                 value.pos = self.snake[f"body{count}"].previous_pos
                 count += 1
-        #left-right
+        #left->right
         if self.snake["head"].pos[0] > self.grid_size[0] -1:
             self.snake["head"].pos = (0,self.snake["head"].pos[1])
         elif self.snake["head"].pos[0] < 0:
             self.snake["head"].pos = (self.grid_size[0] -1,self.snake["head"].pos[1])
             
-        #up-down
+        #up->down
         if self.snake["head"].pos[1] < 0:
             self.snake["head"].pos = (self.snake["head"].pos[0],self.grid_size[1]-1)
         elif self.snake["head"].pos[1] > self.grid_size[1] -1:
