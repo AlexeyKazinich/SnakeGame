@@ -41,11 +41,36 @@ class GameScreen:
         self.movement = "right"
         self.sceneManager = sceneManager
         self.paused = False
+        self.pause_menu_button = {
+            "resume":       Button(self.screen.get_width()//2 - 50, 0, 100,25,"resume",
+                                   self.screen,color=(0,0,122,255),show_background=False, on_click_func=self.resume_button_onclick),
+            
+            "main_menu" :   Button(self.screen.get_width()//2 - 60, 0, 120,25,"main menu",
+                                   self.screen,color=(0,0,122,255),show_background=False, on_click_func=self.main_menu_button_onclick),
+            
+            "quit":         Button(self.screen.get_width()//2 - 12, 0, 50,25,"quit",
+                                   self.screen,color=(0,0,122,255),show_background=False, on_click_func=self.quit_button_onclick),
+        }
+        
+        count = 1
+        for _, button in self.pause_menu_button.items():
+            button.align_on_y_axis(count,4)
+            count += 1
+    
+    def resume_button_onclick(self) -> None:
+        self.paused = False
+    
+    def main_menu_button_onclick(self) -> None:
+        self.sceneManager.change_scene("main_menu")
+    
+    def quit_button_onclick(self) -> None:
+        self.quit()
     
     def update_grid(self) -> None:
         """updates the grid"""
         self.grid.logic(self.movement)
         self.grid.fill_screen()
+    
     
     def draw(self):
         """draws everything to the screen"""
@@ -56,16 +81,22 @@ class GameScreen:
             pause_color = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA)
             pause_color.fill((255,255,255,150))
             self.screen.blit(pause_color,(0,0))
+            
+            for _, button in self.pause_menu_button.items():
+                button.draw()
         
         pygame.display.flip()
+    
+    def quit(self) -> None:
+        self.running = False
+        pygame.quit()
+        sys.exit()
     
     def logic_checks(self):
         """runs all the game logic"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.running = False
-                pygame.quit()
-                sys.exit()
+                self.quit()
             if event.type == pygame.KEYDOWN and not self.paused:
                 if event.key == pygame.K_d and not self.movement == "left":
                     self.movement = "right"
@@ -85,7 +116,11 @@ class GameScreen:
                     print(self.paused)
         
         if not self.paused:          
-            self.update_grid()  
+            self.update_grid()
+            
+        elif self.paused:
+            for _, button in self.pause_menu_button.items():
+                button.update()  
     
 class GameStateManager:
     def __init__(self,screen):

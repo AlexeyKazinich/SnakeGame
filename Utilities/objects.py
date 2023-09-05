@@ -48,6 +48,7 @@ class Button:
                  text_color: pygame.Color = pygame.Color('lightskyblue3'),
                  hover_color: pygame.Color = pygame.Color('deepskyblue1'), 
                  active_color: pygame.Color = pygame.Color('dodgerblue2'),
+                 show_background: bool = False,
                  on_click_func: Callable = None) -> None:
         self.x = x
         self.y = y
@@ -65,6 +66,7 @@ class Button:
         self.__rectangle = Rectangle(self.x,self.y,self.width,self.height,self.window)
         self.__rectangle.set_color(self.color)
         
+        self.show_background = show_background
         self.on_click_func = on_click_func
         
 
@@ -127,14 +129,16 @@ class Button:
         self.textRender = self.font.render(self.text,True,self.text_color)
 
         #draw the outline
-        self.__rectangle.draw_box()
+        if not self.show_background:
+            self.__rectangle.draw_box()
+        else:
+            self.__rectangle.draw()
 
         #draw the text
         self.window.blit(self.textRender,(self.x+5,self.y+5))
     
     def update(self) -> None:
         """run this to draw the button as well as check for collisions"""
-        self.draw()
         self.check_click()
     
     def check_click(self)-> None:
